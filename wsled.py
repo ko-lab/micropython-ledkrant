@@ -70,13 +70,15 @@ def wissenzonderupdate(r,g,b,ww):
 def writetext(woord,r,g,b,ww):
     charpos = 0
     for letter in woord.upper():
-        for i in range(5):
+        idx = 0
+        for val in letters.alleletters(letter):
             charpostmp = charpos
-            for j in letters.binletter(letter,i):
-                if int(j):
-                    np[7-i][charpostmp] = (r,g,b,ww)
-                    np[7-i].write()
+            for j in val:
+                if j == '1':
+                    np[7-idx][charpostmp] = (r,g,b,ww)
+                    np[7-idx].write()
                 charpostmp = charpostmp + 1
+            idx = idx + 1
         charpos = charpos + 4
 
 def scrolltext(woord,r,g,b,ww):
@@ -87,12 +89,14 @@ def scrolltext(woord,r,g,b,ww):
         wissenzonderupdate(0,0,0,0)
         charpos = 0 - k
         for letter in woord.upper():
-            for i in range(5):
+            idx = 0
+            for val in letters.alleletters(letter):
                 charpostmp = charpos
-                for j in letters.binletter(letter,i):
+                for j in val:
                     if int(j) and charpostmp >=0 and charpostmp < 42:
-                        np[7-i][charpostmp] = (r,g,b,ww)
+                        np[7-idx][charpostmp] = (r,g,b,ww)
                     charpostmp = charpostmp + 1
+                idx = idx + 1
             charpos = charpos + 4
         for l in range(8):
             np[l].write()
