@@ -1,5 +1,6 @@
 import machine, neopixel
 import letters
+
 np = [0,1,2,3,4,5,6,7]
 np[0] = neopixel.NeoPixel(machine.Pin(5), 42, bpp=4)
 np[1] = neopixel.NeoPixel(machine.Pin(4), 42, bpp=4)
@@ -29,33 +30,6 @@ def party():
         np[j][i]=(255,0,0,0)
     np[j].write()
     
-def kolab():
-    for j in range(8):
-        for i in range(42):
-            np[j][i] = (0,0,0,0)
-        np[j].write()
-    for i in [35,31,28,27,21,15,14,11,10,9]:
-        np[0][i] = (0,255,0,0)
-        np[0].write()
-    for i in [35,32,29,26,21,16,13,11,8]:
-        np[1][i] = (0,255,0,0)
-        np[1].write()
-    for i in [35,33,29,26,21,16,13,11,8]:
-        np[2][i] = (0,255,0,0)
-        np[2].write()
-    for i in [35,34,29,26,24,23,21,16,15,14,13,11,10,9]:
-        np[3][i] = (0,255,0,0)
-        np[3].write()
-    for i in [35,33,29,26,21,16,13,11,8]:
-        np[4][i] = (0,255,0,0)
-        np[4].write()
-    for i in [35,32,29,26,21,16,13,11,8]:
-        np[5][i] = (0,255,0,0)
-        np[5].write()
-    for i in [35,31,28,27,21,20,19,18,16,13,11,10,9]:
-        np[6][i] = (0,255,0,0)
-        np[6].write()
-        
 def wissen(r,g,b,ww):
     for j in range(8):
         for i in range(42):
@@ -80,23 +54,27 @@ def writetext(woord,r,g,b,ww):
                 charpostmp = charpostmp + 1
             idx = idx + 1
         charpos = charpos + 4
-
-def scrolltext(woord,r,g,b,ww):
-    if (len(woord)*4) < 42:
-        writetext(woord,r,g,b,ww)
-        return
-    for k in range(0,len(woord)*4+1,2):
+            
+def scrolltextng(woord,r,g,b,ww):
+    woordupper = woord.upper()
+    beeld = []
+    for i in range(5):
+        beeld.append([])
+    for letter in woordupper:
+        idx = 0
+        for val in letters.alleletters(letter):
+            for j in val:
+                beeld[idx].append(j)
+            idx = idx + 1
+        for i in range(5):
+            beeld[i].append(0)
+    for k in range(0,len(beeld[1]),4):
         wissenzonderupdate(0,0,0,0)
-        charpos = 0 - k
-        for letter in woord.upper():
+        for i in range(5):
             idx = 0
-            for val in letters.alleletters(letter):
-                charpostmp = charpos
-                for j in val:
-                    if int(j) and charpostmp >=0 and charpostmp < 42:
-                        np[7-idx][charpostmp] = (r,g,b,ww)
-                    charpostmp = charpostmp + 1
+            for j in beeld[i][0+k:42+k]:
+                if j == '1':
+                    np[7-i][idx] = (r,g,b,ww)
                 idx = idx + 1
-            charpos = charpos + 4
         for l in range(8):
             np[l].write()
