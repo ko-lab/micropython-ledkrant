@@ -60,7 +60,7 @@ def scrolltextng(woord,r,g,b,ww):
     beeld = []
     for i in range(5):
         beeld.append([])
-    for letter in woordupper:
+    for letter in "             " + woordupper + " ":
         idx = 0
         for val in letters.alleletters(letter):
             for j in val:
