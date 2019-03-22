@@ -13,4 +13,4 @@ upip.install('micropython-umqtt.robust')
 If the webrepl is not reacting to type input, comment out the call to `mqtt.run()` in `main.py`, then upload the file and restart the wemos.
 
 TO reload the modulae after making changes, without havin to restart the wemos, run:
-`del sys.modules['mqtt_listener']; import mqtt_listener; mqtt_listener.run()`
+`import sys; del sys.modules['mqtt_listener']; del sys.modules['wsled']; import mqtt_listener; mqtt_listener.run()`
