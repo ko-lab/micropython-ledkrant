@@ -1,5 +1,5 @@
 from umqtt.robust import MQTTClient
-from wsled import scrolltextng, writetext, wissen
+from wsled import scrolltextng, writetext, wissen, party
 from time import sleep
 import machine
 import ure
@@ -102,6 +102,10 @@ def sub_callback(topic, msg):
             TEXT_COLOR[1] = rgb[1]
             TEXT_COLOR[2] = rgb[2]
 
+    elif topic == b"ledkrant/party":
+        # change color of default text
+        party(duration = 10)
+
     elif topic == b"ledkrant/reset":
         # restart the ledkrant (for convenience, e.g. after uploading new code)
         print('restarting...')
@@ -132,6 +136,7 @@ def run():
     c.subscribe(b"ledkrant/reset")
     c.subscribe(b"ledkrant/color")
     c.subscribe(b"ledkrant/textcolor")
+    c.subscribe(b"ledkrant/party")
 
     while 1:
         c.wait_msg()

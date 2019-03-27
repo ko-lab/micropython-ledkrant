@@ -1,5 +1,6 @@
 import machine, neopixel
 import letters
+from time import time
 
 np = [0,1,2,3,4,5,6,7]
 np[0] = neopixel.NeoPixel(machine.Pin(5), 42, bpp=4)
@@ -11,24 +12,29 @@ np[5] = neopixel.NeoPixel(machine.Pin(12), 42, bpp=4)
 np[6] = neopixel.NeoPixel(machine.Pin(13), 42, bpp=4)
 np[7] = neopixel.NeoPixel(machine.Pin(15), 42, bpp=4)
 
-def party():
- while 1:
-  for j in range(8):
-    for i in range(42):
-        np[j][i]=(0,0,0,255)
-    np[j].write()
-  for j in range(8):
-    for i in range(42):
-        np[j][i]=(0,0,255,0)
-    np[j].write()
-  for j in range(8):
-    for i in range(42):
-        np[j][i]=(0,255,0,0)
-    np[j].write()
-  for j in range(8):
-    for i in range(42):
-        np[j][i]=(255,0,0,0)
-    np[j].write()
+def party(duration = None):
+    if duration == None:
+        endtime = 0
+    else:
+        endtime = time() + duration
+
+    while time() <= endtime:
+        for j in range(8):
+            for i in range(42):
+                np[j][i] = (0,0,0,255)
+            np[j].write()
+        for j in range(8):
+            for i in range(42):
+                np[j][i] = (0,0,255,0)
+            np[j].write()
+        for j in range(8):
+            for i in range(42):
+                np[j][i] = (0,255,0,0)
+            np[j].write()
+        for j in range(8):
+            for i in range(42):
+                np[j][i] = (255,0,0,0)
+            np[j].write()
     
 
 def wissen(r,g,b,ww):

@@ -2,7 +2,7 @@
 
 ## Setup
 
-To install required micropython libraries, use the WebREPL to log into the ledkrant, then run
+To install the required micropython libraries before fist use, use the WebREPL to log into the ledkrant, then run
 
 ```python
 import upip
@@ -10,7 +10,9 @@ upip.install('micropython-umqtt.simple')
 upip.install('micropython-umqtt.robust')
 ```
 
+## Misc
+
 If the webrepl is not reacting to type input, comment out the call to `mqtt.run()` in `main.py`, then upload the file and restart the wemos.
 
-TO reload the modulae after making changes, without havin to restart the wemos, run:
+To reload the module after making changes, without having to restart the wemos, run:
 `import sys; del sys.modules['mqtt_listener']; del sys.modules['wsled']; import mqtt_listener; mqtt_listener.run()`
