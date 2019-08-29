@@ -1,5 +1,5 @@
 from umqtt.robust import MQTTClient
-from wsled import scrolltextng, writetext, wissen, party
+import wsled
 from time import sleep
 import machine
 import ure
@@ -12,8 +12,8 @@ TEXT_COLOR = [20, 230, 220]
 def show_default():
     """ the default, shown when no other command is running """
     text = '  Ko-Lab'
-    wissen(BG_COLOR[0], BG_COLOR[1], BG_COLOR[2], BRIGHTNESS)
-    writetext(text, TEXT_COLOR[0], TEXT_COLOR[1], TEXT_COLOR[2], BRIGHTNESS)
+    wsled.wissen(BG_COLOR[0], BG_COLOR[1], BG_COLOR[2], BRIGHTNESS)
+    wsled.writetext(text, TEXT_COLOR[0], TEXT_COLOR[1], TEXT_COLOR[2], BRIGHTNESS)
 
 
 def clamp(i, low=0, high=255):
@@ -21,20 +21,24 @@ def clamp(i, low=0, high=255):
     return min(max(i, low), high)
 
 
+# compiling the regex's globally, for speed
+rgb_regex = ure.compile('[rgb\\(]*([0-9]+)[, ]+([0-9]+)[, ]+([0-9]+)\\)*')
+hex_regex = ure.compile('#([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])')
+
 def parse_color_string(s):
     """ tries to parse a string as rgb or hex color code, returns [r, g, b] tuple if 
     succesful, False otherwise """
     rgb = [0, 0, 0]
     try:
         # try to parse string as rgb color
-        col = ure.match('[rgb\\(]*([0-9]+)[, ]+([0-9]+)[, ]+([0-9]+)\\)', s)
+        col = rgb_regex.match(s)
         rgb[0] = clamp(int(col.group(1)))
         rgb[1] = clamp(int(col.group(2)))
         rgb[2] = clamp(int(col.group(3)))
     except:
         try:
             # try to parse string as #hexhexhex color code
-            col = ure.match('#([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])', s) 
+            col = hex_regex.match(s) 
             rgb[0] = clamp(int(col.group(1), 16))
             rgb[1] = clamp(int(col.group(2), 16))
             rgb[2] = clamp(int(col.group(3), 16))
@@ -57,26 +61,30 @@ def sub_callback(topic, msg):
         # Show attention grabbing signal, then scroll text provided in msg 
         # from kolabbot (via `/krant [text]` command)
         for i in range(3):
-            wissen(0, 0, 0, 0)
+            wsled.wissen(0, 0, 0, 0)
             sleep(0.3)
-            writetext("   + + +", 255, 0, 0, 40)
+            wsled.writetext("   + + +", 255, 0, 0, 40)
             sleep(0.3)
-        wissen(0, 0, 0, 0)
+        wsled.wissen(0, 0, 0, 0)
 
         for i in range(3):
-            scrolltextng(str(msg, 'ascii'), 
+            wsled.scrolltextng(str(msg, 'ascii'), 
                 TEXT_COLOR[0], TEXT_COLOR[1], TEXT_COLOR[2], BRIGHTNESS,
                 BG_COLOR[0], BG_COLOR[1], BG_COLOR[2], BRIGHTNESS)
+        
+        show_default()
 
     elif topic == b"ledkrant/time":
         # Shows text in purple, the time is provided in a message from kolabbot
         try:
             text = str(msg, 'ascii')
-            wissen(0, 0, 0, 0)
-            writetext("   " + text, 148, 0, 211, 40)
+            wsled.wissen(0, 0, 0, 0)
+            wsled.writetext("   " + text, 148, 0, 211, 40)
             sleep(10)
         except:
             pass
+        
+        show_default()
 
     elif topic == b"ledkrant/brightness":
         # change brightness of default image
@@ -84,6 +92,8 @@ def sub_callback(topic, msg):
             BRIGHTNESS = clamp(int(msg))
         except:
             pass
+        
+        show_default()
 
     elif topic == b"ledkrant/color":
         # change color of default image
@@ -93,6 +103,32 @@ def sub_callback(topic, msg):
             BG_COLOR[0] = rgb[0]
             BG_COLOR[1] = rgb[1]
             BG_COLOR[2] = rgb[2]
+        
+        show_default()
+
+    elif topic == b"ledkrant/setxy":
+        # change color of one pixel
+        try:
+            msg = str(msg, 'ascii')
+            lines = msg.split('\n')
+            ys = [False] * 7 # keep track of which LED strips to redraw
+            for line in lines:
+                try:
+                    x, y, col = line.split(' ', 2)
+                    x = clamp(int(x), 0, 41)
+                    y = clamp(int(y), 0, 6)
+                    rgb = parse_color_string(col)
+
+                    if(rgb):
+                        ys[int(y)] = True
+                        wsled.setxy(x, y, rgb[0], rgb[1], rgb[2], 0, write=True)
+                except:
+                    pass
+            [wsled.np[i].write() for i, y in enumerate(ys) if y]           
+        except:
+            pass
+
+        # Do NOT show default
 
     elif topic == b"ledkrant/textcolor":
         # change color of default text
@@ -102,20 +138,21 @@ def sub_callback(topic, msg):
             TEXT_COLOR[1] = rgb[1]
             TEXT_COLOR[2] = rgb[2]
 
+        show_default()
+
     elif topic == b"ledkrant/party":
         # change color of default text
-        party(duration = 10)
+        wsled.party(duration = 10)
+        show_default()
 
     elif topic == b"ledkrant/reset":
         # restart the ledkrant (for convenience, e.g. after uploading new code)
         print('restarting...')
-        wissen(0, 0, 0, 0)
-        writetext("    Bye!", 0, 0, 60, 60)
+        wsled.wissen(0, 0, 0, 0)
+        wsled.writetext("    Bye!", 0, 0, 60, 60)
         sleep(2)
-        wissen(0, 0, 0, 0)
+        wsled.wissen(0, 0, 0, 0)
         machine.reset()
-
-    show_default()
 
 
 def run():
@@ -137,6 +174,7 @@ def run():
     c.subscribe(b"ledkrant/color")
     c.subscribe(b"ledkrant/textcolor")
     c.subscribe(b"ledkrant/party")
+    c.subscribe(b"ledkrant/setxy")
 
     while 1:
         c.wait_msg()

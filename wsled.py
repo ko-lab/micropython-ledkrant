@@ -35,7 +35,13 @@ def party(duration = None):
             for i in range(42):
                 np[j][i] = (255,0,0,0)
             np[j].write()
-    
+
+
+def setxy(x, y, r, g, b, ww, write = True):
+    np[y][x] = (r,g,b,ww)
+    if write:
+        np[y].write()
+
 
 def wissen(r,g,b,ww):
     for j in range(8):
